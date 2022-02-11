@@ -5,4 +5,6 @@ vendor
 .DS_Store
 beat-exporter
 beat-exporter.exe
+.idea/
+tools/
 /bin

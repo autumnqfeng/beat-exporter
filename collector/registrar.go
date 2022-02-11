@@ -16,6 +16,11 @@ type Registrar struct {
 		Current float64 `json:"current"`
 		Update  float64 `json:"update"`
 	} `json:"states"`
+	Progress []struct {
+		Source string  `json:"source"`
+		Size   float64 `json:"size"`
+		Offset float64 `json:"offset"`
+	} `json:"progress"`
 }
 
 type registrarCollector struct {
@@ -102,6 +107,21 @@ func (c *registrarCollector) Collect(ch chan<- prometheus.Metric) {
 
 	for _, i := range c.metrics {
 		ch <- prometheus.MustNewConstMetric(i.desc, i.valType, i.eval(c.stats))
+	}
+
+	for _, progress := range c.stats.Registrar.Progress {
+		progressSizeDesc := prometheus.NewDesc(
+			prometheus.BuildFQName(c.beatInfo.Beat, "registrar", "progress_size"),
+			"registrar.progress",
+			nil, prometheus.Labels{"progress_size": progress.Source},
+		)
+		progressOffsetDesc := prometheus.NewDesc(
+			prometheus.BuildFQName(c.beatInfo.Beat, "registrar", "progress_offset"),
+			"registrar.progress",
+			nil, prometheus.Labels{"progress_offset": progress.Source},
+		)
+		ch <- prometheus.MustNewConstMetric(progressSizeDesc, prometheus.GaugeValue, progress.Size)
+		ch <- prometheus.MustNewConstMetric(progressOffsetDesc, prometheus.GaugeValue, progress.Offset)
 	}
 
 }
