@@ -113,15 +113,21 @@ func (c *registrarCollector) Collect(ch chan<- prometheus.Metric) {
 		progressSizeDesc := prometheus.NewDesc(
 			prometheus.BuildFQName(c.beatInfo.Beat, "registrar", "progress_size"),
 			"registrar.progress",
-			nil, prometheus.Labels{"progress_size": progress.Source},
+			nil, prometheus.Labels{"size": progress.Source},
 		)
 		progressOffsetDesc := prometheus.NewDesc(
 			prometheus.BuildFQName(c.beatInfo.Beat, "registrar", "progress_offset"),
 			"registrar.progress",
-			nil, prometheus.Labels{"progress_offset": progress.Source},
+			nil, prometheus.Labels{"offset": progress.Source},
+		)
+		progressBacklogDesc := prometheus.NewDesc(
+			prometheus.BuildFQName(c.beatInfo.Beat, "registrar", "progress_backlog"),
+			"registrar.progress",
+			nil, prometheus.Labels{"backlog": progress.Source},
 		)
 		ch <- prometheus.MustNewConstMetric(progressSizeDesc, prometheus.GaugeValue, progress.Size)
 		ch <- prometheus.MustNewConstMetric(progressOffsetDesc, prometheus.GaugeValue, progress.Offset)
+		ch <- prometheus.MustNewConstMetric(progressBacklogDesc, prometheus.GaugeValue, progress.Size-progress.Offset)
 	}
 
 }
